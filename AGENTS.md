@@ -8,7 +8,29 @@ Todo o desenvolvimento desta SPA React é conduzido sob a premissa do **Spec-Dri
 
 ## Histórico de Prompts
 
-*(Liste abaixo os comandos passados aos agentes de IA ao longo do desenvolvimento deste frontend, garantindo a rastreabilidade da autoria técnica.)*
+### Prompt 02 — Estrutura inicial do módulo de Chat
+
+> **Aja como um Engenheiro Front-end Sênior especialista em React.**
+>
+> **CONTEXTO:**  
+> Branch feature/chat. Projeto React baseado em ESPECIFICACAO_FRONTEND.md.  
+>
+> **INTENÇÃO:**  
+> Gerar apenas a estrutura inicial do módulo de chat.
+>
+> **RESTRIÇÕES:**  
+> - Não implementar lógica de API  
+> - Não incluir upload  
+> - Não incluir histórico  
+> - Apenas estrutura do chat  
+>
+> **RESULTADO GERADO:**
+> - ChatWindow.jsx  
+> - MessageList.jsx  
+> - MessageInput.jsx  
+> - useChat.js  
+> - messageService.js  
+> - api.js  
 
 ### Exemplo de Template de Prompt de Codificação:
 > **Aja como um** Engenheiro de Front-end Sênior especialista em React.
