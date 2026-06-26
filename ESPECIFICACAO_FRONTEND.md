@@ -20,7 +20,9 @@ src/
 │   │   └── MessageInput.jsx             # Input de texto + botão enviar
 │   │
 │   ├── upload/
-│   │   ├── UploadButton.jsx             # Botão de upload
+│   │   ├── DropZone.jsx                 # Zona de arrastar-e-soltar (drag-and-drop)
+│   │   ├── UploadButton.jsx             # Botão de upload (fallback)
+│   │   ├── ProgressBar.jsx              # Barra de progresso visual do upload
 │   │   └── FilePreview.jsx              # Preview do arquivo anexado
 │   │
 │   ├── session/
@@ -62,8 +64,8 @@ src/
 | Aspecto        | Descrição                                                    |
 |----------------|--------------------------------------------------------------|
 | Responsabilidade | Container que orquestra o chat de uma sessão               |
-| Contém         | `MessageList` + `MessageInput` + `UploadButton`             |
-| Estado         | Recebe `messages`, `sessionId`, `onSend`, `onUpload` via props |
+| Contém         | `MessageList` + `MessageInput` + `DropZone` + `ProgressBar` |
+| Estado         | Recebe `messages`, `sessionId`, `onSend`, `onFileDrop`, `progress`, `uploading` via props |
 | Lógica         | Nenhuma — apenas layout                                     |
 
 ### 2.2 MessageList
@@ -93,16 +95,38 @@ src/
 | Callback       | `onSend(text)` — chamado ao pressionar Enter ou clicar enviar |
 | Validação      | Não enviar se texto vazio ou apenas espaços                  |
 
-### 2.5 UploadButton
+### 2.5 DropZone (Drag-and-Drop)
 
 | Aspecto        | Descrição                                                    |
 |----------------|--------------------------------------------------------------|
-| Responsabilidade | Botão que abre seletor de arquivo (PDF/TXT)                  |
+| Responsabilidade | Zona de arrastar-e-soltar para envio de arquivos (PDF/TXT)   |
+| Props          | `onFileDrop(file)`, `disabled`, `acceptedTypes`              |
+| Estado visual  | **idle** → borda tracejada cinza / **dragover** → borda azul highlight + ícone animado / **error** → borda vermelha |
+| Eventos DOM    | `onDragEnter`, `onDragOver`, `onDragLeave`, `onDrop`         |
+| Validação      | Aceitar apenas `.pdf` e `.txt`; rejeitar outros tipos com mensagem de erro visual |
+| Fallback       | Contém `UploadButton` internamente para seleção via clique   |
+| Acessibilidade | `role="button"`, `aria-label="Arraste um arquivo ou clique para enviar"`, navegável por teclado (Enter/Space abre o seletor) |
+
+### 2.6 UploadButton
+
+| Aspecto        | Descrição                                                    |
+|----------------|--------------------------------------------------------------|
+| Responsabilidade | Botão de fallback que abre seletor de arquivo nativo (PDF/TXT) |
 | Callback       | `onUpload(file)` — chamado após seleção                      |
 | Restrições     | Filtro: `accept=".pdf,.txt"`; valida tamanho < 10MB          |
-| Feedback       | Loading state enquanto o upload não completa                 |
+| Feedback       | Desabilitado enquanto upload está em andamento               |
 
-### 2.6 Sidebar
+### 2.7 ProgressBar
+
+| Aspecto        | Descrição                                                    |
+|----------------|--------------------------------------------------------------|
+| Responsabilidade | Exibir o progresso percentual do upload em tempo real        |
+| Props          | `progress` (0–100), `fileName`, `status` (`uploading` / `success` / `error`) |
+| Comportamento  | Barra horizontal animada que preenche de 0% a 100%. Exibe nome do arquivo e percentual numérico ao lado |
+| Estado `success` | Barra fica verde + ícone de check por 2s, depois desaparece com fade-out |
+| Estado `error`   | Barra fica vermelha + mensagem de erro abaixo               |
+
+### 2.8 Sidebar
 
 | Aspecto        | Descrição                                                    |
 |----------------|--------------------------------------------------------------|
@@ -110,7 +134,7 @@ src/
 | Contém         | `SessionList`                                                |
 | Callback       | `onSelectSession(sessionId)` — navega para a sessão clicada  |
 
-### 2.7 Header
+### 2.9 Header
 
 | Aspecto        | Descrição                                                    |
 |----------------|--------------------------------------------------------------|
@@ -155,23 +179,55 @@ function useChat(sessionId) {
 ```javascript
 function useUpload(sessionId) {
   const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState(0);        // 0–100 (percentual)
   const [uploadError, setUploadError] = useState(null);
   const [lastUpload, setLastUpload] = useState(null);
 
   const uploadFile = async (file) => {
-    // valida tipo/tamanho
-    // chama uploadService.upload(file, sessionId)
-    // retorna FileMetadata
+    // 1. Validação client-side
+    const allowedTypes = ['application/pdf', 'text/plain'];
+    if (!allowedTypes.includes(file.type)) {
+      setUploadError('Tipo de arquivo não suportado. Envie PDF ou TXT.');
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      setUploadError('O arquivo excede o limite de 10MB.');
+      return;
+    }
+
+    // 2. Upload com tracking de progresso
+    setUploading(true);
+    setProgress(0);
+    setUploadError(null);
+    try {
+      const result = await uploadService.upload(file, sessionId, (percentCompleted) => {
+        setProgress(percentCompleted); // callback do onUploadProgress
+      });
+      setLastUpload(result);
+      setProgress(100);
+    } catch (err) {
+      setUploadError(err.response?.data?.message || 'Erro ao enviar arquivo.');
+    } finally {
+      setUploading(false);
+    }
   };
 
-  return { uploading, uploadError, lastUpload, uploadFile };
+  const resetUpload = () => {
+    setProgress(0);
+    setUploadError(null);
+    setLastUpload(null);
+  };
+
+  return { uploading, progress, uploadError, lastUpload, uploadFile, resetUpload };
 }
 ```
 
 **Responsabilidade:**
-- Gerenciar estado do upload.
-- Validar arquivo antes de enviar (tipo, tamanho).
-- Chamar `uploadService.upload()`.
+- Gerenciar estado completo do upload (progresso, erro, resultado).
+- Validar arquivo antes de enviar (tipo, tamanho) no client-side.
+- Chamar `uploadService.upload()` com callback de progresso.
+- Expor `progress` (0–100) para alimentar o componente `ProgressBar`.
+- Expor `resetUpload()` para limpar o estado após conclusão.
 
 ### 3.3 useSession
 
@@ -288,12 +344,20 @@ export const sessionService = {
 
 ```javascript
 export const uploadService = {
-  upload: (file, sessionId) => {
+  upload: (file, sessionId, onProgress) => {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('sessionId', sessionId);
     return api.post('/api/upload', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' }
+      headers: { 'Content-Type': 'multipart/form-data' },
+      onUploadProgress: (progressEvent) => {
+        if (onProgress && progressEvent.total) {
+          const percentCompleted = Math.round(
+            (progressEvent.loaded * 100) / progressEvent.total
+          );
+          onProgress(percentCompleted);
+        }
+      }
     }).then(r => r.data);
   },
 };
@@ -334,25 +398,41 @@ Se houver resposta do assistente (via backend ou IA):
          [MessageList] re-renderiza
 ```
 
-### 5.2 Fluxo de Upload
+### 5.2 Fluxo de Upload (com Drag-and-Drop e Barra de Progresso)
 
 ```
-[Usuário clica UploadButton] → input file nativo
-                              ↓ onUpload(file)
-                         [useUpload.uploadFile(file)]
-                              ↓
-                    Valida tipo (.pdf/.txt) e tamanho (<10MB)
-                              ↓ inválido → setUploadError
-                              ↓ válido
-                     [uploadService.upload(file, sessionId)]
-                              ↓
-                    POST /api/upload (multipart/form-data)
-                              ↓
-                    [Backend retorna UploadResponse]
-                              ↓
-         [useChat.sendMessage] cria mensagem com fileId e texto extraído
-                              ↓
-         [MessageList] exibe FilePreview + conteúdo extraído
+[Usuário arrasta arquivo sobre DropZone]    OU    [Usuário clica UploadButton]
+              ↓                                              ↓
+   onDragEnter → visual: borda azul              input file nativo abre
+   onDragOver  → preventDefault                       ↓
+   onDrop      → extrai file do event          seleção do arquivo
+              ↓                                        ↓
+              └──────────── onFileDrop(file) ───────────┘
+                               ↓
+                     [useUpload.uploadFile(file)]
+                               ↓
+                  Validação client-side:
+                  - Tipo: .pdf / .txt apenas
+                  - Tamanho: < 10MB
+                               ↓ inválido → setUploadError → DropZone exibe erro visual
+                               ↓ válido
+                  setUploading(true), setProgress(0)
+                               ↓
+              [uploadService.upload(file, sessionId, onProgress)]
+                               ↓
+                  POST /api/upload (multipart/form-data)
+                               ↓
+              onUploadProgress callback atualiza progress (0→100)
+                               ↓
+              [ProgressBar] renderiza barra animada em tempo real
+                               ↓
+                  [Backend retorna UploadResponse]
+                               ↓
+              setProgress(100) → ProgressBar exibe ✓ (verde, 2s, fade-out)
+                               ↓
+          [useChat.sendMessage] cria mensagem com fileId e texto extraído
+                               ↓
+          [MessageList] exibe FilePreview + conteúdo extraído
 ```
 
 ### 5.3 Fluxo de Histórico (troca de sessão)
