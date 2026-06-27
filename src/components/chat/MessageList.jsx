@@ -1,21 +1,48 @@
 import { useEffect, useRef } from 'react';
+import MessageBubble from './MessageBubble';
+import EmptyState from '../common/EmptyState';
+import LoadingSpinner from '../common/LoadingSpinner';
 
-export default function MessageList({ messages = [] }) {
-  const endRef = useRef(null);
+/**
+ * Lista de mensagens com scroll automático para a última mensagem.
+ * Usa MessageBubble para cada item — campos do backend (role, content, timestamp, fileId).
+ */
+export default function MessageList({ messages, loading }) {
+  const bottomRef = useRef(null);
 
+  // Scroll suave para o final ao receber nova mensagem
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: 'smooth' });
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
   return (
-    <div>
-      {messages.length === 0 && <p>Nenhuma mensagem ainda.</p>}
+    <div className="message-list">
+      {messages.length === 0 && !loading && (
+        <EmptyState
+          icon="💬"
+          title="Nenhuma mensagem ainda"
+          description="Comece a conversa enviando uma mensagem ou anexando um documento PDF/TXT."
+        />
+      )}
+
       {messages.map((msg) => (
-        <div key={msg.id}>
-          <strong>{msg.role}:</strong> {msg.content}
-        </div>
+        <MessageBubble
+          key={msg.id}
+          role={msg.role}
+          content={msg.content}
+          timestamp={msg.timestamp}
+          fileId={msg.fileId}
+        />
       ))}
-      <div ref={endRef} />
+
+      {loading && (
+        <div className="message-list__typing">
+          <LoadingSpinner size={18} />
+          <span>Digitando...</span>
+        </div>
+      )}
+
+      <div ref={bottomRef} />
     </div>
   );
 }

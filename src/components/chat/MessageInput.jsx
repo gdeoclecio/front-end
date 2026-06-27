@@ -1,34 +1,41 @@
 import { useState } from 'react';
 
-export default function MessageInput({ onSend, isSending }) {
+/**
+ * Input de texto com botão de envio.
+ * Envia ao pressionar Enter ou clicar no botão. Valida texto vazio.
+ */
+export default function MessageInput({ onSend, disabled }) {
   const [text, setText] = useState('');
 
-  const handleSubmit = () => {
-    if (!text.trim() || isSending) return;
-    onSend(text.trim());
+  function handleSubmit(e) {
+    e.preventDefault();
+    if (!text.trim() || disabled) return;
+    onSend(text);
     setText('');
-  };
-
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSubmit();
-    }
-  };
+  }
 
   return (
-    <div>
+    <form onSubmit={handleSubmit} className="message-input">
       <input
+        id="message-text-input"
         type="text"
         value={text}
         onChange={(e) => setText(e.target.value)}
-        onKeyDown={handleKeyDown}
-        disabled={isSending}
         placeholder="Digite sua mensagem..."
+        disabled={disabled}
+        autoComplete="off"
       />
-      <button onClick={handleSubmit} disabled={!text.trim() || isSending}>
-        Enviar
+      <button
+        id="message-send-btn"
+        type="submit"
+        disabled={disabled || !text.trim()}
+        title="Enviar mensagem"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13" />
+          <polygon points="22 2 15 22 11 13 2 9 22 2" />
+        </svg>
       </button>
-    </div>
+    </form>
   );
 }

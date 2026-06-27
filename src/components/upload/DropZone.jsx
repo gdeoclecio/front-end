@@ -1,8 +1,13 @@
 import { useState } from 'react';
 import UploadButton from './UploadButton';
 
-export default function DropZone({ onFileDrop, disabled, acceptedTypes }) {
-  const [dragState, setDragState] = useState('idle');
+/**
+ * Zona de arrastar-e-soltar para envio de arquivos (PDF/TXT).
+ * Contém UploadButton como fallback para seleção via clique.
+ * Acessível via teclado (Enter/Space abre o seletor).
+ */
+export default function DropZone({ onFileDrop, disabled }) {
+  const [dragState, setDragState] = useState('idle'); // 'idle' | 'dragover'
 
   const handleDragEnter = (e) => {
     e.preventDefault();
@@ -37,32 +42,32 @@ export default function DropZone({ onFileDrop, disabled, acceptedTypes }) {
     }
   };
 
+  const dropzoneClass = `dropzone ${
+    dragState === 'dragover' ? 'dropzone--active' : ''
+  } ${disabled ? 'dropzone--disabled' : ''}`;
+
   return (
     <div
       role="button"
       tabIndex={0}
       aria-label="Arraste um arquivo ou clique para enviar"
+      className={dropzoneClass}
       onDragEnter={handleDragEnter}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
       onKeyDown={handleKeyDown}
-      style={{
-        border: '2px dashed',
-        borderColor: dragState === 'dragover' ? '#3b82f6' : dragState === 'error' ? '#ef4444' : '#9ca3af',
-        borderRadius: '8px',
-        padding: '24px',
-        textAlign: 'center',
-        backgroundColor: dragState === 'dragover' ? '#eff6ff' : 'transparent',
-        transition: 'all 0.2s',
-        cursor: disabled ? 'not-allowed' : 'pointer',
-        opacity: disabled ? 0.5 : 1,
-      }}
     >
-      <p>Arraste um arquivo aqui ou clique para selecionar</p>
-      <p style={{ fontSize: '12px', color: '#6b7280' }}>
-        {acceptedTypes ? `Formatos aceitos: ${acceptedTypes}` : 'Formatos aceitos: .pdf, .txt'}
-      </p>
+      <div className="dropzone__content">
+        <span className="dropzone__icon">
+          {dragState === 'dragover' ? '📥' : '📎'}
+        </span>
+        <span className="dropzone__text">
+          {dragState === 'dragover'
+            ? 'Solte o arquivo aqui'
+            : 'Arraste um PDF ou TXT aqui'}
+        </span>
+      </div>
       <UploadButton onUpload={onFileDrop} disabled={disabled} />
     </div>
   );
