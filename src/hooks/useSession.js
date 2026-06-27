@@ -20,6 +20,11 @@ export function useSession() {
       // Se não tem sessão ativa e existem sessões, seleciona a primeira
       if (data && data.length > 0 && !activeSessionId) {
         setActiveSessionId(data[0].id);
+      } else if (!data || data.length === 0) {
+        // Cria uma sessão inicial automaticamente se não houver nenhuma
+        const newSession = await sessionService.create({ title: 'Nova conversa' });
+        setSessions([newSession]);
+        setActiveSessionId(newSession.id);
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Erro ao carregar sessões.');
