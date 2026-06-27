@@ -1,36 +1,16 @@
-# Front-end — Projeto de IA
+# React + Vite
 
-Este repositório contém a Single Page Application (SPA) desenvolvida em React para interagir com a API de mensagens e upload de arquivos. 
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-## Tecnologias e Arquitetura
-- **React**: Biblioteca principal (geralmente orquestrada por Vite).
-- **Gestão de Estado Isolada**: O projeto utiliza intensivamente Custom Hooks para isolar o comportamento e as chamadas à API da apresentação visual.
-- **Componentização Declarativa**: A interface de usuário (UI) é formada por componentes puros focados estritamente na exibição dos dados.
+Currently, two official plugins are available:
 
-## Pré-requisitos
-- Node.js (versão 18 ou superior recomendada).
-- npm, yarn ou pnpm.
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
 
-## Como Executar
+## React Compiler
 
-1. Navegue até o diretório do projeto:
-   ```bash
-   cd front-end
-   ```
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
-2. Instale as dependências:
-   ```bash
-   npm install
-   ```
+## Expanding the ESLint configuration
 
-3. Crie um arquivo `.env` baseado nas configurações esperadas (ex: `VITE_API_URL=http://localhost:8080`).
-
-4. Inicie o servidor de desenvolvimento:
-   ```bash
-   npm run dev
-   ```
-
-5. Acesse a aplicação no navegador (geralmente em `http://localhost:5173`).
-
-## Documentação da Especificação
-Para detalhes arquiteturais, árvore de componentes, uso de hooks e fluxos de dados, consulte o arquivo [ESPECIFICACAO_FRONTEND.md](./ESPECIFICACAO_FRONTEND.md).
+If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
