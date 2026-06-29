@@ -1,4 +1,4 @@
-import { ChatWindow } from "./components/ChatWindow"
+import { ChatWindow } from "../src/components/chat/ChatWindow"
 
 function App() {
   return <ChatWindow />
