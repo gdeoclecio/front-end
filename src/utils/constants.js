@@ -12,3 +12,14 @@ export const ROLES = {
   USER: 'USER',
   ASSISTANT: 'ASSISTANT',
 };
+
+/**
+ * Score mínimo de similaridade semântica para considerar
+ * um chunk como relevante (alinhado com MIN_SIMILARITY do backend).
+ */
+export const SOURCE_MIN_SCORE = 0.7;
+
+/**
+ * Nome do evento de log para rastrear uso de sources RAG.
+ */
+export const RAG_LOG_EVENT = '[RAG]';
