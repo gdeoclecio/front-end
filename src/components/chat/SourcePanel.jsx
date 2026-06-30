@@ -1,5 +1,3 @@
-import { useState } from 'react';
-
 /**
  * Painel de fontes RAG — exibe os chunks de texto que o assistente
  * utilizou como contexto para gerar a resposta.

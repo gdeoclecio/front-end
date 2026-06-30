@@ -76,7 +76,8 @@
 
 body {
   margin: 0;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -84,7 +85,8 @@ body {
 #root {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
 }
 
 /* ── Header ──────────────────────────────────────────────────────── */
@@ -252,6 +254,37 @@ body {
   transition: all var(--transition);
   border-left: 3px solid transparent;
   margin-bottom: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.session-item__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.session-item__delete-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  opacity: 0;
+  transition: all var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.session-item:hover .session-item__delete-btn {
+  opacity: 1;
+}
+
+.session-item__delete-btn:hover {
+  color: var(--status-down);
+  background: rgba(239, 68, 68, 0.1);
 }
 
 .session-item:hover {

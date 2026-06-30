@@ -53,6 +53,18 @@ export function useSession() {
     setActiveSessionId(id);
   }, []);
 
+  const deleteSession = useCallback(async (id) => {
+    try {
+      await sessionService.delete(id);
+      setSessions((prev) => prev.filter((s) => s.id !== id));
+      if (activeSessionId === id) {
+        setActiveSessionId(null);
+      }
+    } catch (err) {
+      console.error('Erro ao deletar sessão:', err);
+    }
+  }, [activeSessionId]);
+
   useEffect(() => {
     listSessions();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -65,5 +77,6 @@ export function useSession() {
     createSession,
     listSessions,
     selectSession,
+    deleteSession,
   };
 }
