@@ -62,6 +62,7 @@ export function normalizeSources(rawSources) {
       documentName: s.documentName || 'Documento',
       chunkIndex: s.chunkIndex ?? 0,
       score: Math.round((s.score + Number.EPSILON) * 10000) / 10000,
+      content: s.content || '',
     }));
 }
 
