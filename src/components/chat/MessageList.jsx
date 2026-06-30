@@ -32,6 +32,7 @@ export default function MessageList({ messages, loading }) {
           content={msg.content}
           timestamp={msg.timestamp}
           fileId={msg.fileId}
+          sources={msg.sources}
         />
       ))}
 
