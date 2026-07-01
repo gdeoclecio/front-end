@@ -9,6 +9,7 @@ export default function Sidebar({
   activeSessionId,
   onSelectSession,
   onCreateSession,
+  onDeleteSession,
   loading,
 }) {
   return (
@@ -30,6 +31,7 @@ export default function Sidebar({
           sessions={sessions}
           activeSessionId={activeSessionId}
           onSelectSession={onSelectSession}
+          onDeleteSession={onDeleteSession}
         />
       </div>
     </aside>

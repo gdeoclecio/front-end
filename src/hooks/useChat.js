@@ -42,7 +42,6 @@ export function useChat(sessionId) {
   const activeSessionRef = useRef(sessionId);
   const retryContextRef = useRef(null);
 
-  activeSessionRef.current = sessionId;
 
   // ─── Helpers internos ──────────────────────────────────────────
 
@@ -161,6 +160,7 @@ export function useChat(sessionId) {
   // ─── Troca de sessão ───────────────────────────────────────────
 
   useEffect(() => {
+    activeSessionRef.current = sessionId;
     if (sessionId && sessionId !== prevSessionId.current) {
       prevSessionId.current = sessionId;
       setMessages([]);

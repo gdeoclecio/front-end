@@ -4,7 +4,7 @@ import SessionItem from './SessionItem';
  * Lista de sessões para a Sidebar.
  * Recebe dados e callbacks via props — sem lógica interna.
  */
-export default function SessionList({ sessions = [], activeSessionId, onSelectSession }) {
+export default function SessionList({ sessions = [], activeSessionId, onSelectSession, onDeleteSession }) {
   if (sessions.length === 0) {
     return (
       <div className="session-list__empty">
@@ -22,6 +22,7 @@ export default function SessionList({ sessions = [], activeSessionId, onSelectSe
           session={session}
           isActive={session.id === activeSessionId}
           onSelect={onSelectSession}
+          onDelete={onDeleteSession}
         />
       ))}
     </div>

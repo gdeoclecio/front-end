@@ -18,6 +18,7 @@ function ChatLayout() {
     loading: sessionLoading,
     createSession,
     selectSession,
+    deleteSession,
   } = useSession();
 
   // Usa sessionId da rota se disponível, senão usa o ativo do hook
@@ -48,6 +49,7 @@ function ChatLayout() {
         activeSessionId={currentSessionId}
         onSelectSession={selectSession}
         onCreateSession={handleCreateSession}
+        onDeleteSession={deleteSession}
         loading={sessionLoading}
       />
       <ChatWindow
